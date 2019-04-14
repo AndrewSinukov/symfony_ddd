@@ -1,0 +1,40 @@
+imports:
+  - { resource: "transformers.yaml"}
+
+services:
+  ## here will be Api services
+
+  api.event_listener.api_exception:
+     class: App\Api\App\EventListener\ApiExceptionListener
+     arguments: ['%%kernel.debug%%']
+     tags:
+         - { name: kernel.event_listener, event: kernel.exception, method: onKernelException, priority: 200 }
+
+  ## Fractal Service
+  api.fractal.manager:
+       class: App\Api\App\Support\FractalService
+       public: true
+       arguments: ['%siteUrl%']
+  App\Api\App\Support\FractalService: '@api.fractal.manager'
+
+  ## Api Article Service
+  api.article.service:
+      class: App\Api\Domain\Article\ArticleService
+      public: true
+      arguments: ['@doctrine.orm.entity_manager','@api.article.transformer','@api.fractal.manager']
+  App\Api\Domain\Article\ArticleService: '@api.article.service'
+
+  ## Api User Service
+  api.user.service:
+      class: App\Api\Domain\User\UserService
+      arguments: ['@doctrine.orm.entity_manager','@api.fractal.manager','@api.user.transformer']
+  App\Api\Domain\User\UserService: '@api.user.service'
+
+  ## make fos oauth service public
+  fos_oauth_server.client_manager.default:
+      class: FOS\OAuthServerBundle\Entity\ClientManager
+      public: true
+      arguments: ['@Doctrine\ORM\EntityManagerInterface','%fos_oauth_server.model.client.class%']
+
+  FOS\OAuthServerBundle\Model\AccessTokenManagerInterface:
+      alias: fos_oauth_server.access_token_manager.default

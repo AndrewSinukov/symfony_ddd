@@ -1,0 +1,6 @@
+services:
+    api.article.transformer:
+        class: App\Api\Domain\Article\ArticleTransformer
+
+    api.user.transformer:
+        class: App\Api\Domain\User\UserTransformer
